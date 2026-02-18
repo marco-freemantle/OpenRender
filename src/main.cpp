@@ -1,10 +1,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <stb_image.h>
+
 #include "Renderer/Shader.h"
 #include "Renderer/VAO.h"
 #include "Renderer/VBO.h"
 #include "Renderer/EBO.h"
+#include "Renderer/Texture.h"
 
 // Force the use of the high-performance GPU on systems with dual graphics
 extern "C" {
@@ -16,7 +19,24 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_HEIGHT = 800;
+
+// Vertices coordinates
+GLfloat vertices[] =
+{ //     COORDINATES     /        COLORS      /   TexCoord  //
+	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
+	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
+	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
+	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+};
+
+// Indices for vertices order
+GLuint indices[] =
+{
+	0, 2, 1, // Upper triangle
+	0, 3, 2 // Lower triangle
+};
+
 
 int main()
 {
@@ -47,18 +67,6 @@ int main()
         return -1;
     }
 
-
-    float vertices[] = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
-    };
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-    };
-
     // Create and initialise VAO, VBO and EBO
     VAO vao;
     vao.Bind();
@@ -66,7 +74,9 @@ int main()
     VBO vbo(vertices, sizeof(vertices));
     EBO ebo(indices, sizeof(indices));
 
-    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     vao.Unbind();
     vbo.Unbind();
     ebo.Unbind();
@@ -74,6 +84,12 @@ int main()
     // Load and compile shaders
     Shader shaderProgram("../assets/shaders/default.vert", "../assets/shaders/default.frag");
     shaderProgram.Activate(); 
+
+    GLuint scaleLoc = glGetUniformLocation(shaderProgram.ID, "scale"); // Get the location of the "scale" uniform variable in the shader program
+
+    //Texture
+    Texture texture("../assets/textures/funky_texture.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    texture.BindTextureUnitToShader(shaderProgram, "tex0", 0);
 
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
@@ -87,6 +103,8 @@ int main()
 
         // Draw the object
         shaderProgram.Activate();
+        glUniform1f(scaleLoc, 1.0f); // Set the scale uniform
+        texture.Bind();
         vao.Bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // Execute the draw call
  
@@ -99,6 +117,7 @@ int main()
     vao.Delete();
     vbo.Delete();
     ebo.Delete();
+    texture.Delete();
     shaderProgram.Delete();
 
     glfwTerminate();
