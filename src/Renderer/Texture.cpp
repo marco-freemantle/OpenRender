@@ -44,9 +44,8 @@ Texture::Texture(const char* image, GLenum texType, GLuint slot, GLenum format, 
     glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // for magnifying
 
     // Set texture wrapping parameters:
-    // GL_REPEAT means the texture will repeat if the coordinates go beyond [0, 1]
-    glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // Horizontal wrap (S-axis)
-    glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Vertical wrap (T-axis)
+    glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT); // Horizontal wrap (S-axis)
+    glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT); // Vertical wrap (T-axis)
 
     // Upload the texture image to the GPU:
     // - level 0: base image level

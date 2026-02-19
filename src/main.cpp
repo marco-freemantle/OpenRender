@@ -2,6 +2,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stb_image.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Renderer/Shader.h"
 #include "Renderer/VAO.h"
@@ -24,19 +27,23 @@ const unsigned int SCR_HEIGHT = 800;
 // Vertices coordinates
 GLfloat vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
-	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+	-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+	 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+	 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+	 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
 };
 
 // Indices for vertices order
 GLuint indices[] =
 {
-	0, 2, 1, // Upper triangle
-	0, 3, 2 // Lower triangle
+	0, 1, 2,
+	0, 2, 3,
+	0, 1, 4,
+	1, 2, 4,
+	2, 3, 4,
+	3, 0, 4
 };
-
 
 int main()
 {
@@ -47,7 +54,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create the window object
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenRender", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -63,7 +70,7 @@ int main()
     // Load GLAD to manage OpenGL function pointers (must happen before calling any GL functions)
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        std::cout << "Failed to initialise GLAD" << std::endl;
         return -1;
     }
 
@@ -88,8 +95,13 @@ int main()
     GLuint scaleLoc = glGetUniformLocation(shaderProgram.ID, "scale"); // Get the location of the "scale" uniform variable in the shader program
 
     //Texture
-    Texture texture("../assets/textures/funky_texture.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    Texture texture("../assets/textures/brick.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
     texture.BindTextureUnitToShader(shaderProgram, "tex0", 0);
+
+    float rotation = 0.0f;
+    double previousTime = glfwGetTime();
+
+    glEnable(GL_DEPTH_TEST);
 
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
@@ -99,14 +111,39 @@ int main()
 
         // Clear the screen with a specific color
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear both color and depth buffers
 
-        // Draw the object
         shaderProgram.Activate();
+
+        double currentTime = glfwGetTime();
+        if (currentTime - previousTime >= 0.01) // Rotate every 10ms
+        {
+            rotation += 0.5f; // Rotate by 0.5 degrees
+            if (rotation >= 360.0f)
+                rotation -= 360.0f; // Keep rotation within [0, 360]
+            previousTime = currentTime;
+        }
+
+        glm::mat4 model = glm::mat4(1.0f); 
+        glm::mat4 view = glm::mat4(1.0f); 
+        glm::mat4 projection = glm::mat4(1.0f); 
+
+        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around the Y-axis
+
+        view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
+        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+        int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        int projectionLoc = glGetUniformLocation(shaderProgram.ID, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
         glUniform1f(scaleLoc, 1.0f); // Set the scale uniform
         texture.Bind();
         vao.Bind();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // Execute the draw call
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0); // Draw the object using the indices defined in the EBO
  
         // Swap buffers (Double Buffering) and poll for window events
         glfwSwapBuffers(window);

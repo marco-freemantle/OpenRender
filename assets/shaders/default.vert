@@ -9,9 +9,13 @@ out vec2 texCoord;
 
 uniform float scale;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 void main()
 {
-    gl_Position = vec4(aPos * scale, 1.0); // Scale the vertex position and set it as the output position
+    gl_Position = projection * view * model * vec4(aPos * scale, 1.0); // Apply transformations to the vertex position
     colour = aColour; // Pass the color to the fragment shader
     texCoord = aTexCoord; // Pass the texture coordinate to the fragment shader
 }

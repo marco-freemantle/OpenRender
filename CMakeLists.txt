@@ -30,6 +30,7 @@ add_executable(OpenRender
 target_include_directories(OpenRender PRIVATE
     external/glad/include
     external/stb
+    external/glm
     include
 )
 
