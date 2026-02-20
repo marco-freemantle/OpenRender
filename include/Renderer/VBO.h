@@ -1,5 +1,4 @@
-#ifndef VBO_H
-#define VBO_H
+#pragma once
 
 #include <glad/glad.h>
 
@@ -7,11 +6,9 @@ class VBO
 {
 public:
     GLuint ID;
-    VBO(GLfloat* vertices, GLsizeiptr size);
+    VBO(const GLfloat* vertices, GLsizeiptr size);
 
     void Bind();
     void Unbind();
     void Delete();
 };
-
-#endif

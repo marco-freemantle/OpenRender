@@ -21,7 +21,10 @@ add_executable(OpenRender
     src/Renderer/EBO.cpp
     src/Renderer/Texture.cpp
     src/Renderer/Camera.cpp
+    src/Renderer/Mesh.cpp
     src/Utils/stb.cpp
+    src/Meshes/Pyramid.cpp
+    src/Meshes/Cube.cpp
     external/glad/src/glad.c
 )
 

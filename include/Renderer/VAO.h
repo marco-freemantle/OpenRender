@@ -1,5 +1,4 @@
-#ifndef VAO_H
-#define VAO_H
+#pragma once
 
 #include <glad/glad.h>
 #include "VBO.h"
@@ -15,5 +14,3 @@ public:
     void Unbind();
     void Delete();
 };
-
-#endif

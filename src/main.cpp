@@ -25,27 +25,6 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
-// Vertices coordinates
-GLfloat vertices[] =
-{ //     COORDINATES     /        COLORS      /   TexCoord  //
-	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-	-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-	 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-	 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-	 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
-};
-
-// Indices for vertices order
-GLuint indices[] =
-{
-	0, 1, 2,
-	0, 2, 3,
-	0, 1, 4,
-	1, 2, 4,
-	2, 3, 4,
-	3, 0, 4
-};
-
 int main()
 {
     // Initialise GLFW and set OpenGL version/profile hints
@@ -74,20 +53,6 @@ int main()
         std::cout << "Failed to initialise GLAD" << std::endl;
         return -1;
     }
-
-    // Create and initialise VAO, VBO and EBO
-    VAO vao;
-    vao.Bind();
-
-    VBO vbo(vertices, sizeof(vertices));
-    EBO ebo(indices, sizeof(indices));
-
-    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    vao.Unbind();
-    vbo.Unbind();
-    ebo.Unbind();
 
     // Load and compile shaders
     Shader shaderProgram("../assets/shaders/default.vert", "../assets/shaders/default.frag");
@@ -132,18 +97,13 @@ int main()
 
         glUniform1f(scaleLoc, 1.0f); // Set the scale uniform
         texture.Bind();
-        vao.Bind();
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0); // Draw the object using the indices defined in the EBO
- 
+
         // Swap buffers (Double Buffering) and poll for window events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     // Deallocate resources
-    vao.Delete();
-    vbo.Delete();
-    ebo.Delete();
     texture.Delete();
     shaderProgram.Delete();
 

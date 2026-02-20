@@ -1,5 +1,4 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#pragma once
 
 #include <glad/glad.h>
 #include <stb_image.h>
@@ -19,4 +18,3 @@ public:
 	void Unbind();
 	void Delete();
 };
-#endif
