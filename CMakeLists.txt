@@ -15,12 +15,13 @@ add_subdirectory(external/glfw)
 # Since glad.c is compiled directly into our executable, we don't need to link a separate GLAD library.
 add_executable(OpenRender
     src/main.cpp
-    src/stb.cpp
     src/Renderer/Shader.cpp
     src/Renderer/VBO.cpp
     src/Renderer/VAO.cpp
     src/Renderer/EBO.cpp
     src/Renderer/Texture.cpp
+    src/Renderer/Camera.cpp
+    src/Utils/stb.cpp
     external/glad/src/glad.c
 )
 

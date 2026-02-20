@@ -11,6 +11,7 @@
 #include "Renderer/VBO.h"
 #include "Renderer/EBO.h"
 #include "Renderer/Texture.h"
+#include "Renderer/Camera.h"
 
 // Force the use of the high-performance GPU on systems with dual graphics
 extern "C" {
@@ -102,6 +103,7 @@ int main()
     double previousTime = glfwGetTime();
 
     glEnable(GL_DEPTH_TEST);
+    Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
 
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
@@ -124,21 +126,9 @@ int main()
             previousTime = currentTime;
         }
 
-        glm::mat4 model = glm::mat4(1.0f); 
-        glm::mat4 view = glm::mat4(1.0f); 
-        glm::mat4 projection = glm::mat4(1.0f); 
-
-        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around the Y-axis
-
-        view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-
-        int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        int projectionLoc = glGetUniformLocation(shaderProgram.ID, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        camera.Input(window); // Handle camera input (movement and rotation)
+		camera.UpdateMatrix(45.0f, 0.1f, 100.0f, SCR_WIDTH, SCR_HEIGHT); // Update the camera matrix with the current parameters
+        camera.Matrix(shaderProgram, "camMatrix"); // Send the camera matrix to the shader
 
         glUniform1f(scaleLoc, 1.0f); // Set the scale uniform
         texture.Bind();
