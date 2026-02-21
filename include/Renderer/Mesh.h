@@ -3,14 +3,14 @@
 #include "VAO.h"
 #include "VBO.h"
 #include "EBO.h"
-#include "Texture.h"
+#include "Material.h"
 
 class Mesh
 {
 public:
     Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
 
-    void Draw(Shader& shader);
+    void Draw(Material* material);
     void Delete();
 
     Texture* texture;

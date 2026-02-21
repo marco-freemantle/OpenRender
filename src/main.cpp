@@ -55,20 +55,22 @@ int main()
         return -1;
     }
 
-    // Load and compile shaders
+    // Create shaders
     Shader shaderProgram("../assets/shaders/default.vert", "../assets/shaders/default.frag");
-    shaderProgram.Activate(); 
 
+    // Create meshes
     Mesh cube1 = CreateCube();
-    Mesh cube2 = CreateCube();
 
+    // Create textures
     Texture brick("../assets/textures/brick.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
-    cube1.texture = &brick;
-    cube2.texture = nullptr;
+    // Create materials
+    Material brickMaterial(&shaderProgram, &brick);
+    Material redMaterial(&shaderProgram, nullptr, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
-    glEnable(GL_DEPTH_TEST);
+    // Camera setup
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
+    glEnable(GL_DEPTH_TEST);
 
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
@@ -80,15 +82,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear both color and depth buffers
 
-        shaderProgram.Activate();
-
         camera.Input(window); // Handle camera input (movement and rotation)
 		camera.UpdateMatrix(45.0f, 0.1f, 100.0f, SCR_WIDTH, SCR_HEIGHT); // Update the camera matrix with the current parameters
+
         camera.Matrix(shaderProgram, "camMatrix"); // Send the camera matrix to the shader
         
-        cube1.Draw(shaderProgram);
-        cube2.Draw(shaderProgram);
-        
+        cube1.Draw(&brickMaterial);
+
         // Swap buffers (Double Buffering) and poll for window events
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -96,7 +96,6 @@ int main()
 
     // Deallocate resources
     cube1.Delete();
-    cube2.Delete();
     brick.Delete();
     shaderProgram.Delete();
 

@@ -2,6 +2,7 @@
 
 Mesh CreatePyramid()
 {
+    // TODO: Do not need colour data
     std::vector<float> vertices = {
         -0.5f,0.0f, 0.5f,  0.83f,0.70f,0.44f, 0.0f,0.0f,
         -0.5f,0.0f,-0.5f,  0.83f,0.70f,0.44f, 5.0f,0.0f,

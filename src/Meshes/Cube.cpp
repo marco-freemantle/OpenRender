@@ -2,6 +2,7 @@
 
 Mesh CreateCube()
 {
+    // TODO: Do not need colour data
     std::vector<float> vertices = {
         // position       // color          // texcoord
         -0.5f,-0.5f,-0.5f, 1,0,0, 0,0,

@@ -19,18 +19,9 @@ Mesh::Mesh(const std::vector<float>& vertices,
     vao.Unbind();
 }
 
-void Mesh::Draw(Shader& shader)
+void Mesh::Draw(Material* material)
 {
-    if (texture)
-    {
-        texture->Bind();
-        glUniform1i(glGetUniformLocation(shader.ID, "useTexture"), 1);
-    }
-    else
-    {
-        glUniform1i(glGetUniformLocation(shader.ID, "useTexture"), 0);
-    }
-
+    material->Use();
     vao.Bind();
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }

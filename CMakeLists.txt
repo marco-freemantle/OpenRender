@@ -22,6 +22,7 @@ add_executable(OpenRender
     src/Renderer/Texture.cpp
     src/Renderer/Camera.cpp
     src/Renderer/Mesh.cpp
+    src/Renderer/Material.cpp
     src/Utils/stb.cpp
     src/Meshes/Pyramid.cpp
     src/Meshes/Cube.cpp
