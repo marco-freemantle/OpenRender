@@ -12,6 +12,7 @@
 #include "Renderer/EBO.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Camera.h"
+#include "Meshes/Cube.h"
 
 // Force the use of the high-performance GPU on systems with dual graphics
 extern "C" {
@@ -58,14 +59,13 @@ int main()
     Shader shaderProgram("../assets/shaders/default.vert", "../assets/shaders/default.frag");
     shaderProgram.Activate(); 
 
-    GLuint scaleLoc = glGetUniformLocation(shaderProgram.ID, "scale"); // Get the location of the "scale" uniform variable in the shader program
+    Mesh cube1 = CreateCube();
+    Mesh cube2 = CreateCube();
 
-    //Texture
-    Texture texture("../assets/textures/brick.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-    texture.BindTextureUnitToShader(shaderProgram, "tex0", 0);
+    Texture brick("../assets/textures/brick.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
-    float rotation = 0.0f;
-    double previousTime = glfwGetTime();
+    cube1.texture = &brick;
+    cube2.texture = nullptr;
 
     glEnable(GL_DEPTH_TEST);
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
@@ -82,29 +82,22 @@ int main()
 
         shaderProgram.Activate();
 
-        double currentTime = glfwGetTime();
-        if (currentTime - previousTime >= 0.01) // Rotate every 10ms
-        {
-            rotation += 0.5f; // Rotate by 0.5 degrees
-            if (rotation >= 360.0f)
-                rotation -= 360.0f; // Keep rotation within [0, 360]
-            previousTime = currentTime;
-        }
-
         camera.Input(window); // Handle camera input (movement and rotation)
 		camera.UpdateMatrix(45.0f, 0.1f, 100.0f, SCR_WIDTH, SCR_HEIGHT); // Update the camera matrix with the current parameters
         camera.Matrix(shaderProgram, "camMatrix"); // Send the camera matrix to the shader
-
-        glUniform1f(scaleLoc, 1.0f); // Set the scale uniform
-        texture.Bind();
-
+        
+        cube1.Draw(shaderProgram);
+        cube2.Draw(shaderProgram);
+        
         // Swap buffers (Double Buffering) and poll for window events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     // Deallocate resources
-    texture.Delete();
+    cube1.Delete();
+    cube2.Delete();
+    brick.Delete();
     shaderProgram.Delete();
 
     glfwTerminate();
